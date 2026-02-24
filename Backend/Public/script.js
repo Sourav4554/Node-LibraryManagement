@@ -46,16 +46,31 @@ const fetchDataFromServer = async () => {
 // };
 
 //method for delete moviee
-// const deleteMovie = (index) => {
-//   MovieList.splice(index, 1);
-//   setupLocalstorage(MovieList);
-//  // displayMovie(MovieList);
-// };
+const deleteMovie = async (_id) => {
+  try {
+    const response = await fetch(`${url}/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({ _id }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      alert(data.message);
+      await fetchDataFromServer()
+    } else {
+      throw new Error("server error");
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
 //method for display Movie
 const displayMovie = (MovieList) => {
   cardContainer.innerHTML = "";
-  MovieList.forEach((element, index) => {
+  MovieList.forEach((element) => {
     const card = document.createElement("div");
     card.classList.add("card");
 
@@ -78,12 +93,12 @@ const displayMovie = (MovieList) => {
 
     //function evoke for delete
     deleteButton.addEventListener("click", () => {
-      deleteMovie(index);
+      deleteMovie(element._id);
     });
 
     //function evoke for update
     editButton.addEventListener("click", () => {
-      editMovie(index);
+      editMovie(element._id);
     });
 
     card.append(h2, h4, p, editButton, deleteButton);
@@ -137,8 +152,7 @@ const extractData = async (e) => {
       console.log(error);
     }
   }
-  // setupLocalstorage(MovieList);
-  //displayMovie(MovieList);
+  displayMovie(MovieList);
   await fetchDataFromServer();
   form.reset();
 };

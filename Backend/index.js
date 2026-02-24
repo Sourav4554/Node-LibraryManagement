@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { dbConnection } = require("./dbConnection");
+const { ObjectId } = require("mongodb");
 const PORT = 8000;
 
 const startServer = async () => {
@@ -48,11 +49,11 @@ const startServer = async () => {
         } else if (req.url.startsWith("/fetchData")) {
           const data = await book.find({}).toArray();
           if (data) {
-            res.writeHead(200,{'Content-type':'application/json'})
-            res.end(JSON.stringify(data))
-          }else{
-            res.writeHead(400,{'Content-type':'application/json'})
-            res.end(JSON.stringify({message:'no data found'}))
+            res.writeHead(200, { "Content-type": "application/json" });
+            res.end(JSON.stringify(data));
+          } else {
+            res.writeHead(400, { "Content-type": "application/json" });
+            res.end(JSON.stringify({ message: "no data found" }));
           }
         }
       } else if (req.method === "POST" && req.url.startsWith("/submit")) {
@@ -69,7 +70,22 @@ const startServer = async () => {
           res.end(JSON.stringify({ message: "Student added" }));
         });
       } else if (req.method === "PUT") {
-      } else if (req.method === "DELETE") {
+      } else if (req.method === "DELETE" && req.url.startsWith("/delete")) {
+        let id = "";
+        req.on("data", (chunk) => {
+          id += chunk.toString();
+        });
+        req.on("end", async () => {
+          const parsedId = JSON.parse(id);
+          const result = await book.deleteOne({ _id: new ObjectId(parsedId._id) });
+          if (result.acknowledged) {
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ message: "Book removed" }));
+          }else{
+            res.writeHead(400, { "Content-Type": "text/plain" });
+            res.end(JSON.stringify({ message: "student not deleted" }));
+          }
+        });
       }
     })
     .listen(PORT, () => {
