@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "gitignore": "^0.7.0",
+    "mongodb": "^7.1.0"
+  }
+}
