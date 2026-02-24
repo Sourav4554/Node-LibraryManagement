@@ -69,10 +69,30 @@ const startServer = async () => {
           res.writeHead(201, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ message: "Student added" }));
         });
-      } else if (req.method === "PUT") {
+      } else if (req.method === "PUT" && req.url.startsWith('/update')) {
+       let data=''
+       req.on("data", (chunk) => {
+        data += chunk.toString();  
+      
+      });
+      req.on('end',async()=>{
+      const parsedData=JSON.parse(data)
+      const{editIndex,formEntries:{moviename,category,rating}}=parsedData
+     // console.log(editIndex,moviename,category,rating)
+       const result=await book.updateOne({_id:new ObjectId(editIndex)},{$set:{moviename,category,rating}})
+       if (result.acknowledged) {
+        res.writeHead(201, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Book Updated" }));
+      }else{
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        res.end(JSON.stringify({ message: "student not updated" }));
+      }
+      })
+      
       } else if (req.method === "DELETE" && req.url.startsWith("/delete")) {
         let id = "";
         req.on("data", (chunk) => {
+
           id += chunk.toString();
         });
         req.on("end", async () => {

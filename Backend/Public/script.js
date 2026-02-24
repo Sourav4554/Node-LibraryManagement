@@ -36,14 +36,14 @@ const fetchDataFromServer = async () => {
 // };
 
 //method for edit moviee
-// const editMovie = (index) => {
-
-//   const selectedItem = MovieList[index];
-//   form.children[0].value = selectedItem?.moviename;
-//   form.children[1].value = selectedItem?.category;
-//   form.children[2].value = selectedItem?.rating;
-//   editIndex = index;
-// };
+const editMovie = (_id) => {
+  const selectedItem=MovieList.filter((item)=>item._id===_id)
+  console.log(selectedItem)
+  form.children[0].value = selectedItem[0]?.moviename;
+  form.children[1].value = selectedItem[0]?.category;
+  form.children[2].value = selectedItem[0]?.rating;
+  editIndex = _id;
+};
 
 //method for delete moviee
 const deleteMovie = async (_id) => {
@@ -131,11 +131,28 @@ const extractData = async (e) => {
   const DataFromForm = new FormData(form);
   const formEntries = Object.fromEntries(DataFromForm);
   if (editIndex !== null) {
-    MovieList[editIndex] = formEntries;
-    editIndex = null;
+    console.log('working')
+     try {
+      const response=await fetch(`${url}/update`,{
+      method:'PUT',
+      headers:{
+      'Content-type':'application/json'
+      },
+      body:JSON.stringify({editIndex:editIndex,formEntries:formEntries})
+      })
+      if (response.ok) {
+        const data = await response.json();
+        alert(data.message);
+        await fetchDataFromServer()
+        editIndex = null;
+      } else {
+        throw new Error("server error");
+      }
+     } catch (error) {
+      console.log(error.message)
+     }
+   
   } else {
-    //MovieList.push(formEntries);
-    //console.log('kerri')
     try {
       const response = await fetch(`${url}/submit`, {
         method: "POST",
