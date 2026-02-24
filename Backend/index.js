@@ -45,6 +45,15 @@ const startServer = async () => {
               res.writeHead(200, { "Content-type": "application/javascript" });
             res.end(data);
           });
+        } else if (req.url.startsWith("/fetchData")) {
+          const data = await book.find({}).toArray();
+          if (data) {
+            res.writeHead(200,{'Content-type':'application/json'})
+            res.end(JSON.stringify(data))
+          }else{
+            res.writeHead(400,{'Content-type':'application/json'})
+            res.end(JSON.stringify({message:'no data found'}))
+          }
         }
       } else if (req.method === "POST" && req.url.startsWith("/submit")) {
         let data = "";

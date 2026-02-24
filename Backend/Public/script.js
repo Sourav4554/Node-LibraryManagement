@@ -1,9 +1,29 @@
 const form = document.querySelector("#form");
 const cardContainer = document.querySelector(".grid-container");
 const search = document.querySelector(".search");
-const MovieList = JSON.parse(localStorage.getItem("movie"));
+let MovieList = [];
+const url = "http://localhost:8000";
 let editIndex = null;
 
+//function for fetch data
+const fetchDataFromServer = async () => {
+  try {
+    const response = await fetch(`${url}/fetchData`, {
+      method: "GET",
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+    const data = await response.json();
+    MovieList = [...data];
+    displayMovie(MovieList);
+    if (!response.ok) {
+      throw Error("server error");
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 //method for searchMovie
 // const searchMovie = (e) => {
 //   const userInput = e.target.value.toLowerCase();
@@ -17,7 +37,7 @@ let editIndex = null;
 
 //method for edit moviee
 // const editMovie = (index) => {
-  
+
 //   const selectedItem = MovieList[index];
 //   form.children[0].value = selectedItem?.moviename;
 //   form.children[1].value = selectedItem?.category;
@@ -33,43 +53,43 @@ let editIndex = null;
 // };
 
 //method for display Movie
-// const displayMovie = (MovieList) => {
-//   cardContainer.innerHTML = "";
-//   MovieList.forEach((element, index) => {
-//     const card = document.createElement("div");
-//     card.classList.add("card");
+const displayMovie = (MovieList) => {
+  cardContainer.innerHTML = "";
+  MovieList.forEach((element, index) => {
+    const card = document.createElement("div");
+    card.classList.add("card");
 
-//     const h2 = document.createElement("h2");
-//     h2.textContent = element["moviename"];
+    const h2 = document.createElement("h2");
+    h2.textContent = element["moviename"];
 
-//     const h4 = document.createElement("h4");
-//     h4.textContent = element["category"];
+    const h4 = document.createElement("h4");
+    h4.textContent = element["category"];
 
-//     const p = document.createElement("p");
-//     p.textContent = `⭐ ${element["rating"]}/10`;
+    const p = document.createElement("p");
+    p.textContent = `⭐ ${element["rating"]}/10`;
 
-//     const editButton = document.createElement("button");
-//     editButton.textContent = "Edit";
-//     editButton.classList.add("edit");
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.classList.add("edit");
 
-//     const deleteButton = document.createElement("button");
-//     deleteButton.textContent = "Delete";
-//     deleteButton.classList.add('delete')
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.classList.add("delete");
 
-//     //function evoke for delete
-//     deleteButton.addEventListener("click", () => {
-//       deleteMovie(index);
-//     });
+    //function evoke for delete
+    deleteButton.addEventListener("click", () => {
+      deleteMovie(index);
+    });
 
-//     //function evoke for update
-//     editButton.addEventListener("click", () => {
-//       editMovie(index);
-//     });
+    //function evoke for update
+    editButton.addEventListener("click", () => {
+      editMovie(index);
+    });
 
-//     card.append(h2, h4, p, editButton, deleteButton);
-//     cardContainer.appendChild(card);
-//   });
-// };
+    card.append(h2, h4, p, editButton, deleteButton);
+    cardContainer.appendChild(card);
+  });
+};
 
 //method for localstorage setup
 // const setupLocalstorage = (MovieList) => {
@@ -95,35 +115,35 @@ const extractData = async (e) => {
   }
   const DataFromForm = new FormData(form);
   const formEntries = Object.fromEntries(DataFromForm);
-  if (editIndex !==null ) {
+  if (editIndex !== null) {
     MovieList[editIndex] = formEntries;
-    editIndex=null
+    editIndex = null;
   } else {
     //MovieList.push(formEntries);
     //console.log('kerri')
-  try {
-    
-const response=await fetch('http://localhost:8000/submit',{
-  method:'POST',
-  headers:{
-  'Content-type':'application/json'
-  },
-  body:JSON.stringify(formEntries)
-  })
-if(response.ok){
-const data=await response.json()
-alert(data.message)
-}
-  } catch (error) {
-    console.log(error)
+    try {
+      const response = await fetch(`${url}/submit`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(formEntries),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        alert(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
-}
- // setupLocalstorage(MovieList);
+  // setupLocalstorage(MovieList);
   //displayMovie(MovieList);
+  await fetchDataFromServer();
   form.reset();
 };
 
 //displayMovie(MovieList);
 form.addEventListener("submit", extractData);
-search.addEventListener("keyup", searchMovie);
-console.log('js working')
+// search.addEventListener("keyup", searchMovie);
+fetchDataFromServer();
