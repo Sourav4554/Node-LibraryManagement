@@ -25,15 +25,15 @@ const fetchDataFromServer = async () => {
   }
 };
 //method for searchMovie
-// const searchMovie = (e) => {
-//   const userInput = e.target.value.toLowerCase();
-//   const filteredData = MovieList.filter(
-//     (value) =>
-//       value.moviename.toLowerCase().includes(userInput) ||
-//       value.category.toLowerCase().includes(userInput)
-//   );
-//  // displayMovie(filteredData)
-// };
+const searchMovie = (e) => {
+  const userInput = e.target.value.toLowerCase();
+  const filteredData = MovieList.filter(
+    (value) =>
+      value.moviename.toLowerCase().includes(userInput) ||
+      value.category.toLowerCase().includes(userInput)
+  );
+  displayMovie(filteredData)
+};
 
 //method for edit moviee
 const editMovie = (_id) => {
@@ -106,11 +106,7 @@ const displayMovie = (MovieList) => {
   });
 };
 
-//method for localstorage setup
-// const setupLocalstorage = (MovieList) => {
-//   localStorage.setItem("movie", JSON.stringify(MovieList));
-//   displayMovie(MovieList);
-// };
+
 
 //method for data validation
 const Validate = () => {
@@ -176,5 +172,5 @@ const extractData = async (e) => {
 
 //displayMovie(MovieList);
 form.addEventListener("submit", extractData);
-// search.addEventListener("keyup", searchMovie);
+ search.addEventListener("keyup", searchMovie);
 fetchDataFromServer();
