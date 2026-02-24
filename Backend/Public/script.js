@@ -5,77 +5,77 @@ const MovieList = JSON.parse(localStorage.getItem("movie"));
 let editIndex = null;
 
 //method for searchMovie
-const searchMovie = (e) => {
-  const userInput = e.target.value.toLowerCase();
-  const filteredData = MovieList.filter(
-    (value) =>
-      value.moviename.toLowerCase().includes(userInput) ||
-      value.category.toLowerCase().includes(userInput)
-  );
-  displayMovie(filteredData)
-};
+// const searchMovie = (e) => {
+//   const userInput = e.target.value.toLowerCase();
+//   const filteredData = MovieList.filter(
+//     (value) =>
+//       value.moviename.toLowerCase().includes(userInput) ||
+//       value.category.toLowerCase().includes(userInput)
+//   );
+//  // displayMovie(filteredData)
+// };
 
 //method for edit moviee
-const editMovie = (index) => {
+// const editMovie = (index) => {
   
-  const selectedItem = MovieList[index];
-  form.children[0].value = selectedItem?.moviename;
-  form.children[1].value = selectedItem?.category;
-  form.children[2].value = selectedItem?.rating;
-  editIndex = index;
-};
+//   const selectedItem = MovieList[index];
+//   form.children[0].value = selectedItem?.moviename;
+//   form.children[1].value = selectedItem?.category;
+//   form.children[2].value = selectedItem?.rating;
+//   editIndex = index;
+// };
 
 //method for delete moviee
-const deleteMovie = (index) => {
-  MovieList.splice(index, 1);
-  setupLocalstorage(MovieList);
-  displayMovie(MovieList);
-};
+// const deleteMovie = (index) => {
+//   MovieList.splice(index, 1);
+//   setupLocalstorage(MovieList);
+//  // displayMovie(MovieList);
+// };
 
 //method for display Movie
-const displayMovie = (MovieList) => {
-  cardContainer.innerHTML = "";
-  MovieList.forEach((element, index) => {
-    const card = document.createElement("div");
-    card.classList.add("card");
+// const displayMovie = (MovieList) => {
+//   cardContainer.innerHTML = "";
+//   MovieList.forEach((element, index) => {
+//     const card = document.createElement("div");
+//     card.classList.add("card");
 
-    const h2 = document.createElement("h2");
-    h2.textContent = element["moviename"];
+//     const h2 = document.createElement("h2");
+//     h2.textContent = element["moviename"];
 
-    const h4 = document.createElement("h4");
-    h4.textContent = element["category"];
+//     const h4 = document.createElement("h4");
+//     h4.textContent = element["category"];
 
-    const p = document.createElement("p");
-    p.textContent = `⭐ ${element["rating"]}/10`;
+//     const p = document.createElement("p");
+//     p.textContent = `⭐ ${element["rating"]}/10`;
 
-    const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
-    editButton.classList.add("edit");
+//     const editButton = document.createElement("button");
+//     editButton.textContent = "Edit";
+//     editButton.classList.add("edit");
 
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.classList.add('delete')
+//     const deleteButton = document.createElement("button");
+//     deleteButton.textContent = "Delete";
+//     deleteButton.classList.add('delete')
 
-    //function evoke for delete
-    deleteButton.addEventListener("click", () => {
-      deleteMovie(index);
-    });
+//     //function evoke for delete
+//     deleteButton.addEventListener("click", () => {
+//       deleteMovie(index);
+//     });
 
-    //function evoke for update
-    editButton.addEventListener("click", () => {
-      editMovie(index);
-    });
+//     //function evoke for update
+//     editButton.addEventListener("click", () => {
+//       editMovie(index);
+//     });
 
-    card.append(h2, h4, p, editButton, deleteButton);
-    cardContainer.appendChild(card);
-  });
-};
+//     card.append(h2, h4, p, editButton, deleteButton);
+//     cardContainer.appendChild(card);
+//   });
+// };
 
 //method for localstorage setup
-const setupLocalstorage = (MovieList) => {
-  localStorage.setItem("movie", JSON.stringify(MovieList));
-  displayMovie(MovieList);
-};
+// const setupLocalstorage = (MovieList) => {
+//   localStorage.setItem("movie", JSON.stringify(MovieList));
+//   displayMovie(MovieList);
+// };
 
 //method for data validation
 const Validate = () => {
@@ -87,7 +87,7 @@ const Validate = () => {
 };
 
 //method for exxtract data
-const extractData = (e) => {
+const extractData = async (e) => {
   e.preventDefault();
   if (!Validate()) {
     alert("All fields required");
@@ -99,15 +99,31 @@ const extractData = (e) => {
     MovieList[editIndex] = formEntries;
     editIndex=null
   } else {
-    MovieList.push(formEntries);
-    console.log('kerri')
+    //MovieList.push(formEntries);
+    //console.log('kerri')
+  try {
+    
+const response=await fetch('http://localhost:8000/submit',{
+  method:'POST',
+  headers:{
+  'Content-type':'application/json'
+  },
+  body:JSON.stringify(formEntries)
+  })
+if(response.ok){
+const data=await response.json()
+alert(data.message)
+}
+  } catch (error) {
+    console.log(error)
   }
-
-  setupLocalstorage(MovieList);
-  displayMovie(MovieList);
+}
+ // setupLocalstorage(MovieList);
+  //displayMovie(MovieList);
   form.reset();
 };
 
-displayMovie(MovieList);
+//displayMovie(MovieList);
 form.addEventListener("submit", extractData);
 search.addEventListener("keyup", searchMovie);
+console.log('js working')

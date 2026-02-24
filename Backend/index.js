@@ -1,13 +1,13 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
-const {dbConnection}=require('./dbConnection')
+const { dbConnection } = require("./dbConnection");
 const PORT = 8000;
 
-const startServer=async()=>{
-const db=await dbConnection()
-const student=db.collection('books')
-    http
+const startServer = async () => {
+  const db = await dbConnection();
+  const book = db.collection("books");
+  http
     .createServer(async (req, res) => {
       if (req.method === "GET") {
         //  render html
@@ -34,18 +34,31 @@ const student=db.collection('books')
             res.end(data);
           });
         } else if (req.url === "/script.js") {
-          const jsPage = path.join(__dirname, "Public", "index.html");
+          const jsPage = path.join(__dirname, "Public", "script.js");
+
           fs.readFile(jsPage, (err, data) => {
             if (err) {
               console.log(err);
               res.writeHead(500, { "Content-type": "text/plain" });
               res.end();
-            } else res.writeHead(200, { "Content-type": "application/js" });
+            } else
+              res.writeHead(200, { "Content-type": "application/javascript" });
             res.end(data);
-            
           });
         }
-      } else if (req.method === "POST") {
+      } else if (req.method === "POST" && req.url.startsWith("/submit")) {
+        let data = "";
+        req.on("data", (chunk) => {
+          data += chunk.toString();
+        });
+        req.on("end", async () => {
+          const parsedData = JSON.parse(data);
+
+          book.insertOne(parsedData);
+
+          res.writeHead(201, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ message: "Student added" }));
+        });
       } else if (req.method === "PUT") {
       } else if (req.method === "DELETE") {
       }
@@ -53,6 +66,6 @@ const student=db.collection('books')
     .listen(PORT, () => {
       console.log(`server running on http://localhost:${PORT}`);
     });
-}
+};
 
-startServer()
+startServer();
