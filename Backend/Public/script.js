@@ -1,7 +1,7 @@
 const form = document.querySelector("#form");
 const cardContainer = document.querySelector(".grid-container");
 const search = document.querySelector(".search");
-let MovieList = [];
+let BookList = [];
 const url = "http://localhost:8000";
 let editIndex = null;
 
@@ -15,8 +15,8 @@ const fetchDataFromServer = async () => {
       },
     });
     const data = await response.json();
-    MovieList = [...data];
-    displayMovie(MovieList);
+    BookList = [...data];
+    displayBooks(BookList);
     if (!response.ok) {
       throw Error("server error");
     }
@@ -25,28 +25,35 @@ const fetchDataFromServer = async () => {
   }
 };
 //method for searchMovie
-const searchMovie = (e) => {
+const searchBook = (e) => {
   const userInput = e.target.value.toLowerCase();
-  const filteredData = MovieList.filter(
+  const filteredData = BookList.filter(
     (value) =>
-      value.moviename.toLowerCase().includes(userInput) ||
-      value.category.toLowerCase().includes(userInput)
+      value.bookname.toLowerCase().includes(userInput) 
   );
-  displayMovie(filteredData)
+  displayBooks(filteredData)
 };
 
 //method for edit moviee
-const editMovie = (_id) => {
-  const selectedItem=MovieList.filter((item)=>item._id===_id)
-  console.log(selectedItem)
-  form.children[0].value = selectedItem[0]?.moviename;
-  form.children[1].value = selectedItem[0]?.category;
-  form.children[2].value = selectedItem[0]?.rating;
+const editBook = (_id) => {
+  const selectedItem = BookList.find((item) => item._id === _id);
+
+  if (!selectedItem) return;
+
+  const { bookname, author, genre, price, available } = form.elements;
+
+  bookname.value = selectedItem.bookname;
+  author.value = selectedItem.author;
+  genre.value = selectedItem.genre;
+  price.value = selectedItem.price;
+  available.checked = selectedItem.available;
+
   editIndex = _id;
+
 };
 
 //method for delete moviee
-const deleteMovie = async (_id) => {
+const deleteBook = async (_id) => {
   try {
     const response = await fetch(`${url}/delete`, {
       method: "DELETE",
@@ -68,53 +75,93 @@ const deleteMovie = async (_id) => {
 };
 
 //method for display Movie
-const displayMovie = (MovieList) => {
-  cardContainer.innerHTML = "";
-  MovieList.forEach((element) => {
-    const card = document.createElement("div");
-    card.classList.add("card");
 
-    const h2 = document.createElement("h2");
-    h2.textContent = element["moviename"];
-
-    const h4 = document.createElement("h4");
-    h4.textContent = element["category"];
-
-    const p = document.createElement("p");
-    p.textContent = `⭐ ${element["rating"]}/10`;
-
-    const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
-    editButton.classList.add("edit");
-
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.classList.add("delete");
-
-    //function evoke for delete
-    deleteButton.addEventListener("click", () => {
-      deleteMovie(element._id);
+  const displayBooks = (bookList) => {
+    cardContainer.innerHTML = "";
+  
+    bookList.forEach((element) => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+  
+      const h2 = document.createElement("h2");
+      h2.textContent = element.bookname;
+  
+      const author = document.createElement("h4");
+      author.textContent = `Author: ${element.author}`;
+  
+      const genre = document.createElement("p");
+      genre.textContent = `Genre: ${element.genre}`;
+  
+      const price = document.createElement("p");
+      price.textContent = `₹ ${element.price}`;
+  
+      const availability = document.createElement("p");
+      availability.textContent = element.available
+        ? "✅ Available"
+        : "❌ Not Available";
+  
+      const editButton = document.createElement("button");
+      editButton.textContent = "Edit";
+      editButton.classList.add("edit");
+  
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.classList.add("delete");
+  
+      deleteButton.addEventListener("click", () => {
+        deleteBook(element._id);
+      });
+  
+      editButton.addEventListener("click", () => {
+        editBook(element._id);
+      });
+  
+      card.append(
+        h2,
+        author,
+        genre,
+        price,
+        availability,
+        editButton,
+        deleteButton
+      );
+  
+      cardContainer.appendChild(card);
     });
-
-    //function evoke for update
-    editButton.addEventListener("click", () => {
-      editMovie(element._id);
-    });
-
-    card.append(h2, h4, p, editButton, deleteButton);
-    cardContainer.appendChild(card);
-  });
+  
 };
 
 
 
 //method for data validation
+
+
 const Validate = () => {
-  return form.children[0].value !== "" &&
-    form.children[1].value !== "" &&
-    form.children[2].value !== ""
-    ? true
-    : false;
+  const {
+    bookname,
+    author,
+    genre,
+    price,
+    available
+  } = form.elements;
+
+  const bookName = bookname.value.trim();
+  const authorName = author.value.trim();
+  const bookGenre = genre.value;
+  const bookPrice = price.value.trim();
+ // const isAvailable = available.checked;
+
+  // Required field validation
+  if (!bookName || !authorName || !bookGenre || !bookPrice ) {
+    return false;
+  }
+
+  // Price must be positive
+  if (Number(bookPrice) <= 0) {
+    return false;
+  }
+
+  return true;
 };
 
 //method for exxtract data
@@ -165,12 +212,12 @@ const extractData = async (e) => {
       console.log(error);
     }
   }
-  displayMovie(MovieList);
+  displayBooks(BookList);
   await fetchDataFromServer();
   form.reset();
 };
 
 //displayMovie(MovieList);
 form.addEventListener("submit", extractData);
- search.addEventListener("keyup", searchMovie);
+ search.addEventListener("keyup", searchBook);
 fetchDataFromServer();

@@ -76,10 +76,13 @@ const startServer = async () => {
       
       });
       req.on('end',async()=>{
-      const parsedData=JSON.parse(data)
-      const{editIndex,formEntries:{moviename,category,rating}}=parsedData
-     // console.log(editIndex,moviename,category,rating)
-       const result=await book.updateOne({_id:new ObjectId(editIndex)},{$set:{moviename,category,rating}})
+        const parsedData = JSON.parse(data);
+
+        const { editIndex, formEntries } = parsedData;
+        const result=await book.updateOne(
+          { _id: new ObjectId(editIndex) },
+          { $set: { ...formEntries, price: Number(formEntries.price) } }
+        );
        if (result.acknowledged) {
         res.writeHead(201, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ message: "Book Updated" }));
